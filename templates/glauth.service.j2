@@ -1,0 +1,14 @@
+[Unit]
+Description=A lightweight LDAP server for development, home use, or CI
+Documentation=https://github.com/glauth/glauth
+After=network.target
+ConditionPathExists=/etc/glauth.conf
+ConditionFileIsExecutable=/usr/local/bin/glauth
+
+[Service]
+ExecStart=/usr/local/bin/glauth -c /etc/glauth.conf
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

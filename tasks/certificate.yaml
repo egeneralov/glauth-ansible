@@ -1,0 +1,39 @@
+---
+
+- name: checks
+  block:
+    - name: "check if {{ glauth.ldaps.key }} exist"
+      stat:
+        path: "{{ glauth.ldaps.key }}"
+      register: ldaps_key
+      when: glauth.ldaps.key is defined
+    
+    - name: "check if {{ glauth.ldaps.cert }} exist"
+      stat:
+        path: "{{ glauth.ldaps.cert }}"
+      register: ldaps_cert
+      when: glauth.ldaps.cert is defined
+
+- name: key managment
+  block:
+    - name: Generate an OpenSSL private key
+      openssl_privatekey:
+        path: "{{ glauth.ldaps.key }}"
+      when: glauth.ldaps.key is defined and glauth.ldaps.key.stat.islnk is not defined
+
+- name: certificate managment
+  block:
+    - name: Generate an OpenSSL Certificate Signing Request
+      openssl_csr:
+        path: "{{ glauth.ldaps.key }}.csr"
+        privatekey_path: "{{ glauth.ldaps.key }}"
+        common_name: "{{ ansible_default_ipv4.address }}"
+      when: glauth.ldaps.key is defined and glauth.ldaps.cert is defined
+    
+    - name: Generate a Self Signed OpenSSL certificate
+      openssl_certificate:
+        path: "{{ glauth.ldaps.cert }}"
+        privatekey_path: "{{ glauth.ldaps.key }}"
+        csr_path: "{{ glauth.ldaps.key }}.csr"
+        provider: selfsigned
+      when: glauth.ldaps.key is defined and glauth.ldaps.cert is defined and glauth.ldaps.cert.stat.islnk is not defined

@@ -1,0 +1,9 @@
+---
+
+- hosts: localhost
+  gather_facts: yes
+  vars:
+    python_version: "2.7"
+  roles:
+    - egeneralov.python
+    - egeneralov.glauth

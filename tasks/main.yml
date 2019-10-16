@@ -1,0 +1,40 @@
+---
+# tasks file for egeneralov.glauth
+
+- name: "install : required pip modules"
+  pip:
+    name: ["pytoml","pyyaml","PyOpenSSL"]
+
+- name: "download : glauth"
+  get_url:
+     url: "{{ __urls__[ansible_system][ansible_machine] }}"
+     dest: /usr/local/bin/glauth
+     mode: 0777
+
+- name: "provide self-signed certificate if glauth.ldaps.enabled and glauth.ldaps.{key,cert} not exist"
+  include_tasks: certificate.yaml
+  when: glauth.ldaps.enabled
+
+- name: "config : generate"
+  yaml2toml:
+    payload: "{{ glauth | to_yaml }}"
+  register: glauth_config
+
+- name: "config : place"
+  template:
+    src: glauth.conf.j2
+    dest: /etc/glauth.conf
+  register: glauth_conf
+
+- name: "systemd : configure : glauth.service"
+  template:
+    src: glauth.service.j2
+    dest: /etc/systemd/system/glauth.service
+  register: glauth_service
+
+- name: "systemd : configure"
+  systemd:
+    name: glauth.service
+    enabled: yes
+    state: "{% if glauth_conf.changed %}re{% endif %}started"
+    daemon_reload: "{% if glauth_service.changed %}yes{% else %}no{% endif %}"

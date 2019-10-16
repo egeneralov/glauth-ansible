@@ -1,0 +1,35 @@
+---
+
+version: v1.1.1
+
+__urls__:
+  Darwin:
+    x86_64: "https://github.com/glauth/glauth/releases/download/{{ version }}/glauthOSX"
+  Linux:
+    x86_64: "https://github.com/glauth/glauth/releases/download/{{ version }}/glauth64"
+    x86: "https://github.com/glauth/glauth/releases/download/{{ version }}/glauth64"
+
+glauth:
+  debug: true
+  ldap:
+    enabled: true
+    listen: '0.0.0.0:389'
+  ldaps:
+    enabled: true
+    listen: '0.0.0.0:636'
+    cert: /etc/glauth.crt
+    key: /etc/glauth.key
+  backend:
+    datastore: config
+    baseDN: 'dc=glauth,dc=com'
+  users:
+    - name: admin
+      loginShell: /bin/bash
+      homeDir: /home/admin
+      unixid: 5001
+      primarygroup: 6001
+  groups:
+    - name: admins
+      unixid: 6001
+  api:
+    enabled: false
