@@ -14,12 +14,15 @@
       register: ldaps_cert
       when: glauth.ldaps.cert is defined
 
+- debug:
+    var: ldaps_cert
+
 - name: key managment
   block:
     - name: Generate an OpenSSL private key
       openssl_privatekey:
         path: "{{ glauth.ldaps.key }}"
-      when: glauth.ldaps.key is defined and glauth.ldaps.key.stat.islnk is not defined
+      when: glauth.ldaps.key is defined and ldaps_key.stat.exists == false
 
 - name: certificate managment
   block:
@@ -28,7 +31,7 @@
         path: "{{ glauth.ldaps.key }}.csr"
         privatekey_path: "{{ glauth.ldaps.key }}"
         common_name: "{{ ansible_default_ipv4.address }}"
-      when: glauth.ldaps.key is defined and glauth.ldaps.cert is defined
+      when: glauth.ldaps.key is defined and glauth.ldaps.cert is defined and ldaps_cert.stat.exists == false
     
     - name: Generate a Self Signed OpenSSL certificate
       openssl_certificate:
@@ -36,4 +39,4 @@
         privatekey_path: "{{ glauth.ldaps.key }}"
         csr_path: "{{ glauth.ldaps.key }}.csr"
         provider: selfsigned
-      when: glauth.ldaps.key is defined and glauth.ldaps.cert is defined and glauth.ldaps.cert.stat.islnk is not defined
+      when: glauth.ldaps.key is defined and glauth.ldaps.cert is defined and ldaps_cert.stat.exists == false
