@@ -14,9 +14,6 @@
       register: ldaps_cert
       when: glauth.ldaps.cert is defined
 
-- debug:
-    var: ldaps_cert
-
 - name: key managment
   block:
     - name: Generate an OpenSSL private key
