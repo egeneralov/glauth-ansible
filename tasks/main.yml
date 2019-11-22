@@ -3,26 +3,16 @@
 
 - name: "install : required pip modules"
   pip:
-    name: ["pytoml","pyyaml","PyOpenSSL"]
-
-- name: "check if over-gitlab installation"
-  stat:
-    path: "/etc/gitlab/gitlab.rb"
-  register: gitlab_rb
-
-- name: "download : glauth compatible with gitlab"
-  get_url:
-     url: "https://gitlab.com/egeneralov/glauth/-/jobs/325566942/artifacts/raw/glauth"
-     dest: /usr/local/bin/glauth
-     mode: 0777
-  when: gitlab_rb.stat.exists == true
+    name:
+      - pytoml
+      - pyyaml
+      - PyOpenSSL
 
 - name: "download : glauth"
   get_url:
      url: "{{ __urls__[ansible_system][ansible_machine] }}"
      dest: /usr/local/bin/glauth
      mode: 0777
-  when: gitlab_rb.stat.exists == false
 
 - name: "provide self-signed certificate if glauth.ldaps.enabled and glauth.ldaps.{key,cert} not exist"
   include_tasks: certificate.yaml
